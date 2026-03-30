@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS  # Add CORS support
-from pymongo import MongoClient
+import pymongo
 import json
 import os
 
@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app) 
 # MongoDB Atlas connection
 MONGO_URI = "mongodb+srv://dummy:1234@tram.uzwi1fl.mongodb.net/?appName=tram"
-mongo_client = MongoClient(MONGO_URI)
+mongo_client = pymongo.MongoClient(MONGO_URI)
 db = mongo_client['DockerData']
 users_collection = db['users']
 

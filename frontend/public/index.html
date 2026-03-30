@@ -3,85 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Submission</title>
+    <title>Submit Data to MongoDB</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        body { font-family: Arial, sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
         .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, textarea, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-        button { background: #007bff; color: white; padding: 12px 30px; border: none; border-radius: 4px; cursor: pointer; }
+        input { width: 100%; padding: 10px; margin-top: 5px; box-sizing: border-box; }
+        button { background: #007bff; color: white; padding: 12px 30px; border: none; cursor: pointer; width: 100%; }
         button:hover { background: #0056b3; }
-        .result { margin-top: 20px; padding: 15px; border-radius: 4px; }
-        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .success { color: green; background: #d4edda; padding: 10px; border-radius: 5px; }
+        .error { color: red; background: #f8d7da; padding: 10px; border-radius: 5px; }
+        .message { margin-top: 20px; }
     </style>
 </head>
 <body>
-    <h1>Student Registration Form</h1>
-    <form id="studentForm">
+    <h2>Submit User Data</h2>
+    
+    <form id="dataForm">
         <div class="form-group">
-            <label for="name">Full Name:</label>
-            <input type="text" id="name" name="name" required>
+            <label>Name:</label>
+            <input type="text" id="name" required>
         </div>
-        
         <div class="form-group">
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
+            <label>Email:</label>
+            <input type="email" id="email" required>
         </div>
-        
         <div class="form-group">
-            <label for="course">Course:</label>
-            <select id="course" name="course" required>
-                <option value="">Select Course</option>
-                <option value="Computer Science">Computer Science</option>
-                <option value="Data Science">Data Science</option>
-                <option value="Web Development">Web Development</option>
-            </select>
+            <label>Age:</label>
+            <input type="number" id="age" min="1" max="120" required>
         </div>
-        
-        <div class="form-group">
-            <label for="grade">Grade:</label>
-            <input type="number" id="grade" name="grade" min="0" max="100" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="comments">Comments:</label>
-            <textarea id="comments" name="comments" rows="4"></textarea>
-        </div>
-        
-        <button type="submit">Submit</button>
+        <button type="submit" id="submitBtn">Submit Data</button>
     </form>
     
-    <div id="result"></div>
+    <div id="message" class="message"></div>
 
     <script>
-        document.getElementById('studentForm').addEventListener('submit', async (e) => {
+        const form = document.getElementById('dataForm');
+        const messageDiv = document.getElementById('message');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData);
-            
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                age: parseInt(document.getElementById('age').value),
+                timestamp: new Date().toISOString()
+            };
+
+            // Show loading
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+            messageDiv.innerHTML = '';
+
             try {
-                const response = await fetch('/submit', {
+                const response = await fetch('http://backend:5000/submit', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(formData)
                 });
-                
+
                 const result = await response.json();
-                
-                const resultDiv = document.getElementById('result');
-                if (response.ok) {
-                    resultDiv.innerHTML = `<div class="result success">${result.message}</div>`;
-                    document.getElementById('studentForm').reset();
+
+                if (result.success) {
+                    // SUCCESS: Redirect to success page
+                    window.location.href = 'success.html';
                 } else {
-                    resultDiv.innerHTML = `<div class="result error">Error: ${result.error}</div>`;
+                    // ERROR: Show on same page
+                    throw new Error(result.error || 'Submission failed');
                 }
+                
             } catch (error) {
-                document.getElementById('result').innerHTML = 
-                    '<div class="result error">Network error. Please try again.</div>';
+                // ERROR: Show on same page
+                messageDiv.innerHTML = `
+                    <div class="error">
+                        <strong>Submission Failed:</strong> ${error.message}
+                    </div>
+                `;
+            } finally {
+                // Reset button
+                submitBtn.textContent = 'Submit Data';
+                submitBtn.disabled = false;
             }
         });
     </script>

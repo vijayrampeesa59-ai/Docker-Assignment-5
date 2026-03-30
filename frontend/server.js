@@ -14,7 +14,7 @@ app.get('/', (req, res) => {
 });
 
 // Proxy form submissions to Flask backend
-app.post('/submit', async (req, res) => {
+app.post('http://localhost:5000/submit', async (req, res) => {
   try {
     const response = await fetch('http://backend:5000/submit', {
       method: 'POST',

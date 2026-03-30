@@ -16,7 +16,7 @@ app.get('/', (req, res) => {
 // Proxy form submissions to Flask backend
 app.post('/submit', async (req, res) => {
   try {
-    const response = await fetch('http://backend:3000/submit', {
+    const response = await fetch('http://backend:5000/submit', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

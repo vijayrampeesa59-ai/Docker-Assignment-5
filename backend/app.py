@@ -15,7 +15,7 @@ users_collection = db['users']
 @app.route('/api', methods=['GET'])
 def get_api_data():
     try:
-        file_path = os.path.join(os.path.dirname(__file__), 'backend_data.json')
+        file_path = os.path.join(os.path.dirname(__file__), 'backend/backend_data.json')
         with open(file_path, 'r') as f:
             data = json.load(f)
         return jsonify(data)
